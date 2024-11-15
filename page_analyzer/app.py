@@ -9,6 +9,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY']
 os.getenv('SECRET_KEY')
 
+
 @app.route('/')
 def home():
     return "Welcome to the Page Analyzer!"
