@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Сайты{% endblock %}
+
+{% block  content %}
+<div class="table-responsive">
+
+<!-- Отображение flash-сообщений -->
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-success" role="alert">
+            {{ messages[0] }}
+        </div>
+    {% endif %}
+{% endwith %}
+
+    <table class="table table-bordered table-hover text-nowrap" data-test="url">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Имя</th>
+        <th>Последняя проверка</th>
+        <th>Код ответа</th> 
+      </tr>
+      </thead>
+      <tbody>
+        {% for url in urls %}
+            <tr>
+                <td>{{ url[0] }}</td>
+                <td>
+                    <a href="{{ url_for('show_url', id=url[0]) }}">{{ url[1] }}</a>
+                </td>
+                <td>{{ url[2] }}</td>
+                <td>{{ url[3] }}</td>
+            </tr>
+            {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
