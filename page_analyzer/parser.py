@@ -27,7 +27,8 @@ def check_seo(url):
             'status_code': response.status_code
         }
     except Exception as e:
-        # print(f"Ошибка при проверке SEO: {e}")  # ошибка в консоль для отладки
+        # ошибка в консоль для отладки
+        # print(f"Ошибка при проверке SEO: {e}")
         # Возвращаем None, если произошла ошибка
         return {
             'status_code': None,
