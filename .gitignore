@@ -1,6 +1,9 @@
 .vscode/
 .env
 __pycache__/
+__pycache__/
+*.pyc
+*.py[cod]
 *.egg-info
 __pycache__
 dist/
