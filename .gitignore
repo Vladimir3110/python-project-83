@@ -1,0 +1,12 @@
+.vscode/
+.env
+__pycache__/
+*.egg-info
+__pycache__
+dist/
+*.pyc
+.venv/
+.coverage
+coverage.xml
+.pytest_cache/
+.env
