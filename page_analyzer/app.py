@@ -66,7 +66,6 @@ def add_url():
             flash('URL успешно добавлен!', 'success')
     except Exception as e:
         flash(f'Ошибка при добавлении URL: {e}', 'error')
-    
     return redirect(url_for('list_urls'))
 
 #    try:
