@@ -68,75 +68,49 @@ def add_url():
         flash(f'Ошибка при добавлении URL: {e}', 'error')
     return redirect(url_for('list_urls'))
 
-#    try:
-#        cursor = conn.cursor()
-#        url_id = add_url_to_db(cursor, url)
-#        if url_id is not None and status_code is not None:
-#            add_url_check_to_db(cursor, url_id, status_code)
-#        conn.commit()
-#        flash('URL успешно добавлен!', 'success')
-#    except Exception as e:
-#        flash(f'Ошибка при добавлении URL: {e}', 'error')
-#    return redirect(url_for('list_urls'))
-
-
-# @app.route('/urls', methods=['GET'])
-# def list_urls():
-#    cursor.execute('''
-#        SELECT u.id, u.name,
-#               (
-#                   SELECT MAX(created_at)
-#                   FROM url_checks
-#                   WHERE url_id = u.id
-#               ) AS last_check,
-#               (
-#                   SELECT status_code
-#                   FROM url_checks
-#                   WHERE url_id = u.id
-#                   ORDER BY created_at DESC
-#                   LIMIT 1
-#               ) AS status_code
-#        FROM urls u
-#        ORDER BY u.created_at DESC
-#    ''')
-#    urls = cursor.fetchall()
-#    return render_template('urls.html', urls=urls)
 
 @app.route('/urls', methods=['GET'])
 def list_urls():
-    cursor = conn.cursor()
+    """Обработчик маршрута для отображения списка URL."""
+    urls = []
     try:
-        with conn.cursor() as cursor:
-            cursor.execute('''
-                SELECT u.id, u.name,
-                       (
-                           SELECT MAX(created_at)
-                           FROM url_checks
-                           WHERE url_id = u.id
-                       ) AS last_check,
-                       (
-                           SELECT status_code
-                           FROM url_checks
-                           WHERE url_id = u.id
-                           ORDER BY created_at DESC
-                           LIMIT 1
-                       ) AS status_code
-                FROM urls u
-                ORDER BY u.created_at DESC
-            ''')
-            urls = cursor.fetchall()
-    finally:
-        conn.close()
+        # Пытаемся подключиться к базе данных
+        with psycopg2.connect(
+            app.config['DATABASE_URL'],
+            sslmode='require'
+        ) as conn:
+
+            with conn.cursor() as cursor:
+                cursor.execute('''
+                    SELECT u.id, u.name,
+                           (
+                               SELECT MAX(created_at)
+                               FROM url_checks
+                               WHERE url_id = u.id
+                           ) AS last_check,
+                           (
+                               SELECT status_code
+                               FROM url_checks
+                               WHERE url_id = u.id
+                               ORDER BY created_at DESC
+                               LIMIT 1
+                           ) AS status_code
+                    FROM urls u
+                    ORDER BY u.created_at DESC
+                ''')
+                urls = cursor.fetchall()
+    except psycopg2.Error as e:
+        print(f'Ошибка при работе с базой данных: {e}')
+        flash('Ошибка при получении данных из базы данных', 'error')
     return render_template('urls.html', urls=urls)
 
 
 @app.route('/urls/<int:id>', methods=['GET'])
 def show_url(id):
     """Маршрут для отображения URL и его проверок."""
-    url, checks = get_url_and_checks(cursor, id)
+    url, checks = get_url_and_checks(id)
     if not url:
-        return 'URL не найден', 404  # Если URL не найден, возвращаем 404
-
+        return 'URL не найден', 404
     return render_template('url.html', url=url, checks=checks)
 
 
