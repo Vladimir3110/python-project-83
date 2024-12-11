@@ -58,15 +58,27 @@ def add_url():
 
     # Добавление URL в базу данных
     try:
-        cursor = conn.cursor()
-        url_id = add_url_to_db(cursor, url)
-        if url_id is not None and status_code is not None:
-            add_url_check_to_db(cursor, url_id, status_code)
-        conn.commit()
-        flash('URL успешно добавлен!', 'success')
+        with conn.cursor() as cursor:  # контекстный менеджер для курсора
+            url_id = add_url_to_db(cursor, url)
+            if url_id is not None and status_code is not None:
+                add_url_check_to_db(cursor, url_id, status_code)
+            conn.commit()
+            flash('URL успешно добавлен!', 'success')
     except Exception as e:
         flash(f'Ошибка при добавлении URL: {e}', 'error')
+    
     return redirect(url_for('list_urls'))
+
+#    try:
+#        cursor = conn.cursor()
+#        url_id = add_url_to_db(cursor, url)
+#        if url_id is not None and status_code is not None:
+#            add_url_check_to_db(cursor, url_id, status_code)
+#        conn.commit()
+#        flash('URL успешно добавлен!', 'success')
+#    except Exception as e:
+#        flash(f'Ошибка при добавлении URL: {e}', 'error')
+#    return redirect(url_for('list_urls'))
 
 
 @app.route('/urls', methods=['GET'])
