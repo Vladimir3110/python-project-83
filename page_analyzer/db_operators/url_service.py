@@ -11,7 +11,7 @@ def get_url_and_checks(url_id):
         # Пытаемся подключиться к базе данных
         with psycopg2.connect(
             current_app.config['DATABASE_URL'],
-            sslmode='require'
+            sslmode='prefer'
         ) as conn:
 
             with conn.cursor() as cursor:
