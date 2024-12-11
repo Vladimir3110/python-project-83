@@ -22,7 +22,7 @@ app.config['SECRET_KEY'] = SECRET_KEY
 
 try:
     # Пытаемся подключиться к базе данных
-    conn = psycopg2.connect(app.config['DATABASE_URL'], sslmode='require')
+    conn = psycopg2.connect(app.config['DATABASE_URL'], sslmode='prefer')
     cursor = conn.cursor()
     print('Установлено соединение с базой данных')
 except KeyError:
@@ -77,7 +77,7 @@ def list_urls():
         # Пытаемся подключиться к базе данных
         with psycopg2.connect(
             app.config['DATABASE_URL'],
-            sslmode='require'
+            sslmode='prefer'
         ) as conn:
 
             with conn.cursor() as cursor:
