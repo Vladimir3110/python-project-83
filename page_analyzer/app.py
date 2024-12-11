@@ -80,26 +80,53 @@ def add_url():
 #    return redirect(url_for('list_urls'))
 
 
+# @app.route('/urls', methods=['GET'])
+# def list_urls():
+#    cursor.execute('''
+#        SELECT u.id, u.name,
+#               (
+#                   SELECT MAX(created_at)
+#                   FROM url_checks
+#                   WHERE url_id = u.id
+#               ) AS last_check,
+#               (
+#                   SELECT status_code
+#                   FROM url_checks
+#                   WHERE url_id = u.id
+#                   ORDER BY created_at DESC
+#                   LIMIT 1
+#               ) AS status_code
+#        FROM urls u
+#        ORDER BY u.created_at DESC
+#    ''')
+#    urls = cursor.fetchall()
+#    return render_template('urls.html', urls=urls)
+
 @app.route('/urls', methods=['GET'])
 def list_urls():
-    cursor.execute('''
-        SELECT u.id, u.name,
-               (
-                   SELECT MAX(created_at)
-                   FROM url_checks
-                   WHERE url_id = u.id
-               ) AS last_check,
-               (
-                   SELECT status_code
-                   FROM url_checks
-                   WHERE url_id = u.id
-                   ORDER BY created_at DESC
-                   LIMIT 1
-               ) AS status_code
-        FROM urls u
-        ORDER BY u.created_at DESC
-    ''')
-    urls = cursor.fetchall()
+    cursor = conn.cursor()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute('''
+                SELECT u.id, u.name,
+                       (
+                           SELECT MAX(created_at)
+                           FROM url_checks
+                           WHERE url_id = u.id
+                       ) AS last_check,
+                       (
+                           SELECT status_code
+                           FROM url_checks
+                           WHERE url_id = u.id
+                           ORDER BY created_at DESC
+                           LIMIT 1
+                       ) AS status_code
+                FROM urls u
+                ORDER BY u.created_at DESC
+            ''')
+            urls = cursor.fetchall()
+    finally:
+        conn.close()
     return render_template('urls.html', urls=urls)
 
 
