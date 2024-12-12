@@ -35,12 +35,12 @@ def handle_check_url(cursor, conn, id):
 
     except KeyError:
         # print('DATABASE_URL не найден в конфигурации приложения')
-        flash('Ошибка конфигурации базы данных', 'error', 'danger')
+        flash('Ошибка конфигурации базы данных', 'error')
     except psycopg2.OperationalError as e:
         print(f'Невозможно установить соединение с базой данных: {e}')
         flash('Ошибка подключения к базе данных', 'error', 'danger')
     except Exception as e:
-        flash(f'Ошибка при добавлении проверки: {e}', 'error', 'danger')
+        flash(f'Ошибка при добавлении проверки: {e}', 'error')
     finally:
         if 'conn' in locals():
             conn.close()
