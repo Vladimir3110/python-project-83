@@ -19,7 +19,6 @@
 |:------------------------------------:|:-------:|
 | python                               |  3.11   |
 | [poetry](https://python-poetry.org/) |  1.7.1  |
-| [pytest](https://docs.pytest.org/)   |  8.2.1  |
 | [flake8](https://flake8.pycqa.org/)  |  7.1.0  |
 | flask                                |  3.1.0  |
 | gunicorn                             |  23.0.0 |
