@@ -56,6 +56,7 @@ def add_url():
 
     # Добавление URL в базу данных
     try:
+        conn = psycopg2.connect(DATABASE_URL)
         with conn.cursor() as cursor:  # контекстный менеджер для курсора
             url_id = add_url_to_db(cursor, url)
             if url_id is not None and status_code is not None:
@@ -64,6 +65,9 @@ def add_url():
             flash('URL успешно добавлен!', 'success')
     except Exception as e:
         flash(f'Ошибка при добавлении URL: {e}', 'error', 'danger')
+    finally:
+        if 'conn' in locals():
+            conn.close()
     return redirect(url_for('list_urls'))
 
 
