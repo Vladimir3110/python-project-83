@@ -1,6 +1,7 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/Vladimir3110/python-project-83/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Vladimir3110/python-project-83/actions)
 [![CI check](https://github.com/Vladimir3110/python-project-83/actions/workflows/test.yml/badge.svg)](https://github.com/Vladimir3110/python-project-83/actions/workflows/test.yml)
+[![Maintainability](https://api.codeclimate.com/v1/badges/9fbbdba3bd6d2b520e39/maintainability)](https://codeclimate.com/github/Vladimir3110/python-project-83/maintainability)
 ---
 # Анализатор страниц
 
