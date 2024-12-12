@@ -13,7 +13,7 @@ def add_url_to_db(cursor, url):
         )
         return cursor.fetchone()[0]  # Возвращаем id добавленного URL
     except Exception as e:
-        flash(f'Ошибка при добавлении URL: {e}', 'error')
+        flash(f'Ошибка при добавлении URL: {e}', 'error', 'danger')
         return None
 
 
@@ -27,4 +27,4 @@ def add_url_check_to_db(cursor, url_id, status_code):
             (url_id, status_code, formatted_check_date)
         )
     except Exception as e:
-        flash(f'Ошибка при добавлении проверки URL: {e}', 'error')
+        flash(f'Ошибка при добавлении проверки URL: {e}', 'error', 'danger')
