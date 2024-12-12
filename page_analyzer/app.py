@@ -62,7 +62,7 @@ def add_url():
             if url_id is not None and status_code is not None:
                 add_url_check_to_db(cursor, url_id, status_code)
             conn.commit()
-            flash('URL успешно добавлен!', 'success')
+            flash('Страница успешно добавлена!', 'success')
     except Exception as e:
         flash(f'Ошибка при добавлении URL: {e}', 'error')
     finally:
