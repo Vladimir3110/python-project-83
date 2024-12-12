@@ -19,7 +19,7 @@ def handle_check_url(cursor, conn, id):
         cursor.execute('SELECT name FROM urls WHERE id = %s', (id,))
         url = cursor.fetchone()
         if not url:
-            flash('URL не найден', 'error')
+            flash('URL не найден', 'error', 'danger')
             return redirect(url_for('list_urls'))
         # Проверяем SEO-параметры и получаем данные
         seo_data = check_seo(url[0])  # Передаем URL в функцию check_seo
@@ -35,12 +35,12 @@ def handle_check_url(cursor, conn, id):
 
     except KeyError:
         # print('DATABASE_URL не найден в конфигурации приложения')
-        flash('Ошибка конфигурации базы данных', 'error')
+        flash('Ошибка конфигурации базы данных', 'error', 'danger')
     except psycopg2.OperationalError as e:
         print(f'Невозможно установить соединение с базой данных: {e}')
-        flash('Ошибка подключения к базе данных', 'error')
+        flash('Ошибка подключения к базе данных', 'error', 'danger')
     except Exception as e:
-        flash(f'Ошибка при добавлении проверки: {e}', 'error')
+        flash(f'Ошибка при добавлении проверки: {e}', 'error', 'danger')
     finally:
         if 'conn' in locals():
             conn.close()
