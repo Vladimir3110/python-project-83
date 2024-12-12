@@ -47,11 +47,9 @@ def add_url():
 
     # Нормализация URL
     url = normalize_url(url)
-
     # Проверка длины URL
     if not check_url_length(url):
         return redirect(url_for('home'))
-
     # Проверяем SEO-параметры и получаем код ответа
     seo_data = check_seo(url)
     status_code = seo_data.get('status_code', None)
