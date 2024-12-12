@@ -65,7 +65,7 @@ def add_url():
             conn.commit()
             flash('URL успешно добавлен!', 'success')
     except Exception as e:
-        flash(f'Ошибка при добавлении URL: {e}', 'error')
+        flash(f'Ошибка при добавлении URL: {e}', 'error', 'danger')
     return redirect(url_for('list_urls'))
 
 
@@ -101,7 +101,7 @@ def list_urls():
                 urls = cursor.fetchall()
     except psycopg2.Error as e:
         print(f'Ошибка при работе с базой данных: {e}')
-        flash('Ошибка при получении данных из базы данных', 'error')
+        flash('Ошибка при получении данных из базы данных', 'error', 'danger')
     return render_template('urls.html', urls=urls)
 
 
