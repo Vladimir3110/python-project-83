@@ -42,7 +42,15 @@ def add_url():
     try:
         conn = psycopg2.connect(DATABASE_URL)
         with conn.cursor() as cursor:
-            # Получаем текущее время и форматируем его
+            # Проверка на существование URL
+            cursor.execute('SELECT id FROM urls WHERE name = %s', (url,))
+            existing_url = cursor.fetchone()
+            if existing_url:
+                flash('Страница уже существует', 'error')
+                return redirect(url_for('home'))
+
+        # =====================
+        # Добавление URL в базу данных
             created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             cursor.execute(
                 "INSERT INTO urls (name, created_at) VALUES (%s, %s)\
@@ -101,7 +109,12 @@ def show_url(id):
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def check_url(id):
     """Обработчик маршрута для проверки URL."""
-    return handle_check_url(cursor, conn, id)
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        return handle_check_url(cursor, conn, id)
+    finally:
+        if 'conn' in locals():
+            conn.close()
 
 
 if __name__ == '__main__':
