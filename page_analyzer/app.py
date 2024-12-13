@@ -111,7 +111,7 @@ def check_url(id):
     """Обработчик маршрута для проверки URL."""
     try:
         conn = psycopg2.connect(DATABASE_URL)
-        return handle_check_url(cursor, conn, id)
+        return handle_check_url(conn, id)
     finally:
         if 'conn' in locals():
             conn.close()
