@@ -13,7 +13,6 @@ def get_url_and_checks(url_id):
             current_app.config['DATABASE_URL'],
             sslmode='prefer'
         ) as conn:
-
             with conn.cursor() as cursor:
                 # Получаем URL
                 cursor.execute(
@@ -21,7 +20,6 @@ def get_url_and_checks(url_id):
                         url_id,)
                 )
                 url = cursor.fetchone()
-
                 if not url:
                     return None, None
                 # Получаем все проверки для данного URL

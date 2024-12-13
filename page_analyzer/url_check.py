@@ -32,7 +32,6 @@ def handle_check_url(cursor, conn, id):
         )
         conn.commit()
         flash('Страница успешно проверена!', 'success')
-
     except KeyError:
         # print('DATABASE_URL не найден в конфигурации приложения')
         flash('Ошибка конфигурации базы данных', 'error')

@@ -1,19 +1,12 @@
+from datetime import datetime
+
 import psycopg2
 from flask import Flask, flash, redirect, render_template, request, url_for
 
 from page_analyzer.config import DATABASE_URL, SECRET_KEY
-from page_analyzer.db_operators.database import (
-    add_url_check_to_db,
-    add_url_to_db,
-)
 from page_analyzer.db_operators.url_service import get_url_and_checks
-from page_analyzer.parser import check_seo
 from page_analyzer.url_check import handle_check_url
-from page_analyzer.validate import (
-    check_url_length,
-    normalize_url,
-    validate_url,
-)
+from page_analyzer.validate import normalize_url, validate_url
 
 app = Flask(__name__)
 app.config['DATABASE_URL'] = DATABASE_URL
@@ -40,27 +33,21 @@ def home():
 @app.route('/urls', methods=['POST'])
 def add_url():
     url = request.form.get('url')
-
     # Валидация URL
     if not validate_url(url):
         return redirect(url_for('home'))
-
     # Нормализация URL
     url = normalize_url(url)
-    # Проверка длины URL
-    if not check_url_length(url):
-        return redirect(url_for('home'))
-    # Проверяем SEO-параметры и получаем код ответа
-    seo_data = check_seo(url)
-    status_code = seo_data.get('status_code', None)
-
     # Добавление URL в базу данных
     try:
         conn = psycopg2.connect(DATABASE_URL)
-        with conn.cursor() as cursor:  # контекстный менеджер для курсора
-            url_id = add_url_to_db(cursor, url)
-            if url_id is not None and status_code is not None:
-                add_url_check_to_db(cursor, url_id, status_code)
+        with conn.cursor() as cursor:
+            # Получаем текущее время и форматируем его
+            created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            cursor.execute(
+                "INSERT INTO urls (name, created_at) VALUES (%s, %s)\
+                RETURNING id", (url, created_at))
+            new_url_id = cursor.fetchone()[0]  # Получаем ID нового URL
             conn.commit()
             flash('Страница успешно добавлена!', 'success')
     except Exception as e:
@@ -68,51 +55,46 @@ def add_url():
     finally:
         if 'conn' in locals():
             conn.close()
-    return redirect(url_for('list_urls'))
+    # Перенаправление на страницу с деталями добавленного URL
+    return redirect(url_for('show_url', id=new_url_id))
 
 
-@app.route('/urls', methods=['GET'])
-def list_urls():
-    """Обработчик маршрута для отображения списка URL."""
-    urls = []
+@app.route('/urls')
+def urls():
+    """Обработчик маршрута для отображения списка URL с их проверками."""
     try:
-        # Пытаемся подключиться к базе данных
-        with psycopg2.connect(
-            app.config['DATABASE_URL'],
-            sslmode='prefer'
-        ) as conn:
-
-            with conn.cursor() as cursor:
-                cursor.execute('''
-                    SELECT u.id, u.name,
-                           (
-                               SELECT MAX(created_at)
-                               FROM url_checks
-                               WHERE url_id = u.id
-                           ) AS last_check,
-                           (
-                               SELECT status_code
-                               FROM url_checks
-                               WHERE url_id = u.id
-                               ORDER BY created_at DESC
-                               LIMIT 1
-                           ) AS status_code
-                    FROM urls u
-                    ORDER BY u.created_at DESC
-                ''')
-                urls = cursor.fetchall()
-    except psycopg2.Error as e:
-        print(f'Ошибка при работе с базой данных: {e}')
-        flash('Ошибка при получении данных из базы данных', 'error')
+        conn = psycopg2.connect(DATABASE_URL)
+        with conn.cursor() as cursor:
+            # Извлечение URL и их последних проверок
+            cursor.execute("""
+                SELECT u.id, u.name, u.created_at, uc.status_code
+                FROM urls u
+                LEFT JOIN (
+                    SELECT url_id, status_code
+                    FROM url_checks
+                    WHERE id IN (
+                        SELECT MAX(id) FROM url_checks GROUP BY url_id
+                    )
+                ) uc ON u.id = uc.url_id
+                ORDER BY u.created_at DESC
+            """)
+            urls = cursor.fetchall()
+    except Exception as e:
+        flash(f'Ошибка при получении URL: {e}', 'error')
+        urls = []
+    finally:
+        if 'conn' in locals():
+            conn.close()
     return render_template('urls.html', urls=urls)
 
 
 @app.route('/urls/<int:id>', methods=['GET'])
 def show_url(id):
-    """Маршрут для отображения URL и его проверок."""
+    """Маршрут для отображения списка URL и его проверок."""
     url, checks = get_url_and_checks(id)
     if not url:
-        return 'URL не найден', 404
+        flash('URL не найден', 'error')
+        return redirect(url_for('urls'))
     return render_template('url.html', url=url, checks=checks)
 
 
