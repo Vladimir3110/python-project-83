@@ -2,11 +2,10 @@ from datetime import datetime
 
 import psycopg2
 from flask import Flask, flash, redirect, render_template, request, url_for
-
 from page_analyzer.config import DATABASE_URL, SECRET_KEY
 from page_analyzer.db_operators.url_service import get_url_and_checks
 from page_analyzer.url_check import handle_check_url
-from page_analyzer.validate import get_url_by_id, normalize_url, validate_url
+from page_analyzer.validate import normalize_url, validate_url
 
 app = Flask(__name__)
 app.config['DATABASE_URL'] = DATABASE_URL
@@ -35,7 +34,6 @@ def add_url():
     url = request.form.get('url')
     # Валидация URL
     if not validate_url(url):
-        flash('Некорректный URL', 'error')
         return redirect(url_for('home'))
     # Нормализация URL
     url = normalize_url(url)
@@ -110,10 +108,6 @@ def show_url(id):
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def check_url(id):
     """Обработчик маршрута для проверки URL."""
-    url = get_url_by_id(id)
-    if not url or not validate_url(url):
-        flash('Некорректный URL', 'error')
-        return redirect(url_for('show_url', id=id))
     try:
         conn = psycopg2.connect(DATABASE_URL)
         return handle_check_url(conn, id)
