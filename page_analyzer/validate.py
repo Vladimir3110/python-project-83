@@ -40,6 +40,9 @@ def normalize_url(url):
         normalized_url = normalized_url[:-1]
 
     # Проверка на существование URL
+    if normalized_url.startswith('https://'):
+        normalized_url = normalized_url.replace('https://', 'http://', 1)
+    # Проверка на существование URL
     if normalized_url in existing_urls:
         return "Страница уже существует"
     # Добавление нормализованного URL в набор
