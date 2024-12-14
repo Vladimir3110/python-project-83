@@ -12,6 +12,10 @@ def validate_url(url):
     return True
 
 
+# Хранение уже нормализованных URL для проверки дубликатов
+existing_urls = set()
+
+
 def normalize_url(url):
     """Нормализация URL, добавление схемы, если она отсутствует."""
     parsed_url = urlparse(url)
@@ -32,4 +36,12 @@ def normalize_url(url):
         netloc = netloc[:-4]  # Удаление ':443'
     # Восстановление нормализованного URL
     normalized_url = urlunparse((scheme, netloc, path, '', query, fragment))
+    if normalized_url.endswith('/') and normalized_url != 'http://':
+        normalized_url = normalized_url[:-1]
+
+    # Проверка на существование URL
+    if normalized_url in existing_urls:
+        return "Страница уже существует"
+    # Добавление нормализованного URL в набор
+    existing_urls.add(normalized_url)
     return normalized_url
