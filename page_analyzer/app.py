@@ -47,7 +47,7 @@ def add_url():
             cursor.execute('SELECT id FROM urls WHERE name = %s', (url,))
             existing_url = cursor.fetchone()
             if existing_url:
-                flash('Страница уже существует', 'success')
+                flash('Страница уже добавлена', 'success')
                 return redirect(url_for('show_url', id=existing_url[0]))
 
         # =====================
