@@ -38,8 +38,7 @@ def add_url():
         return redirect(url_for('home'))
     # Нормализация URL
     url = normalize_url(url)
-
-    # Добавление URL в базу данных
+    # Проверка на уникальность URL перед добавлением
     try:
         conn = psycopg2.connect(DATABASE_URL)
         with conn.cursor() as cursor:
@@ -49,16 +48,15 @@ def add_url():
             if existing_url:
                 flash('Страница уже существует', 'success')
                 return redirect(url_for('show_url', id=existing_url[0]))
-
-        # =====================
-        # Добавление URL в базу данных
-            created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            cursor.execute(
-                "INSERT INTO urls (name, created_at) VALUES (%s, %s)\
-                RETURNING id", (url, created_at))
-            new_url_id = cursor.fetchone()[0]  # Получаем ID нового URL
-            conn.commit()
-            flash('Страница успешно добавлена!', 'success')
+            else:
+                # Добавление URL в базу данных
+                created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                cursor.execute(
+                    "INSERT INTO urls (name, created_at) VALUES (%s, %s) \
+                    RETURNING id", (url, created_at))
+                new_url_id = cursor.fetchone()[0]  # Получаем ID нового URL
+                conn.commit()
+                flash('Страница успешно добавлена!', 'success')
     except Exception as e:
         flash(f'Ошибка при добавлении URL: {e}', 'error')
     finally:
