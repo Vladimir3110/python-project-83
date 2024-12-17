@@ -6,7 +6,12 @@ from flask import Flask, flash, redirect, render_template, request, url_for
 from page_analyzer.config import DATABASE_URL, SECRET_KEY
 from page_analyzer.db_operators.url_service import get_url_and_checks
 from page_analyzer.url_check import handle_check_url
-from page_analyzer.validate import normalize_url, validate_url
+from page_analyzer.validate import (
+    add_url_to_db,
+    check_existing_url,
+    normalize_url,
+    validate_url,
+)
 
 app = Flask(__name__)
 app.config['DATABASE_URL'] = DATABASE_URL
@@ -35,33 +40,26 @@ def home():
 @app.route('/urls', methods=['POST'])
 def add_url():
     url = request.form.get('url')
+    # Валидация URL
+    errors = validate_url(url)
+    if errors:
+        return render_template('index.html', errors=errors), 422
     # Нормализация URL
     normalized_url = normalize_url(url)
     # Проверка на существование URL
-    if isinstance(normalized_url, int):  # Если это ID существующего URL
+    existing_url_id = check_existing_url(normalized_url)
+    if existing_url_id:
         flash('Страница уже существует', 'success')
-        return redirect(url_for('show_url', id=normalized_url))
-    # Валидация URL
-    if not validate_url(normalized_url):
-        return redirect(url_for('home'))
+        return redirect(url_for('show_url', id=existing_url_id))
 
     # Добавление URL в базу данных
-    try:
-        conn = psycopg2.connect(DATABASE_URL)
-        with conn.cursor() as cursor:
-            created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            cursor.execute(
-                "INSERT INTO urls (name, created_at) VALUES (%s, %s) \
-                RETURNING id", (normalized_url, created_at))
-            new_url_id = cursor.fetchone()[0]  # Получаем ID нового URL
-            conn.commit()
-            flash('Страница успешно добавлена!', 'success')
-    except Exception as e:
-        flash(f'Ошибка при добавлении URL: {e}', 'error')
-    finally:
-        if 'conn' in locals():
-            conn.close()
-    # Перенаправление на страницу с деталями добавленного URL
+    date = datetime.now()
+    is_added, new_url_id = add_url_to_db(
+        app.config['DATABASE_URL'], normalized_url, date)
+    if is_added:
+        flash('Страница успешно добавлена!', 'success')
+    else:
+        flash('Ошибка при добавлении URL', 'error')
     return redirect(url_for('show_url', id=new_url_id))
 
 
