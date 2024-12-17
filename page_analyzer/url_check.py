@@ -19,6 +19,10 @@ def handle_check_url(conn, id):
             return redirect(url_for('list_urls'))
         # Проверяем SEO-параметры и получаем данные
         seo_data = check_seo(url[0])  # Передаем URL в функцию check_seo
+        # Проверяем, что данные SEO корректны
+        if seo_data is None:
+            flash('Ошибка при получении данных SEO', 'error')
+            return redirect(url_for('show_url', id=id))
         # Добавляем запись в таблицу url_checks
         cursor.execute(
             'INSERT INTO url_checks (url_id, status_code, title, description, \
@@ -28,9 +32,6 @@ def handle_check_url(conn, id):
         )
         conn.commit()
         flash('Страница успешно проверена!', 'success')
-    except KeyError:
-        # print('DATABASE_URL не найден в конфигурации приложения')
-        flash('Ошибка конфигурации базы данных', 'error')
     except psycopg2.OperationalError as e:
         print(f'Невозможно установить соединение с базой данных: {e}')
         flash('Ошибка подключения к базе данных', 'error')
