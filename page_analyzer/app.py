@@ -13,16 +13,18 @@ app.config['DATABASE_URL'] = DATABASE_URL
 app.config['SECRET_KEY'] = SECRET_KEY
 
 
-try:
-    # Пытаемся подключиться к базе данных
-    conn = psycopg2.connect(app.config['DATABASE_URL'], sslmode='prefer')
-    cursor = conn.cursor()
-    print('Установлено соединение с базой данных')
-except KeyError:
-    print('DATABASE_URL не найден в конфигурации приложения')
-except psycopg2.OperationalError:
-    # В случае сбоя подключения будет выведено сообщение
-    print('Невозможно установить соединение с базой данных')
+def get_db_connection():
+    """Создает и возвращает соединение с базой данных."""
+    try:
+        conn = psycopg2.connect(DATABASE_URL, sslmode='prefer')
+        print('Установлено соединение с базой данных')
+        return conn
+    except KeyError:
+        print('DATABASE_URL не найден в конфигурации приложения')
+        return None
+    except psycopg2.OperationalError:
+        print('Невозможно установить соединение с базой данных')
+        return None
 
 
 @app.route('/')
@@ -30,41 +32,6 @@ def home():
     return render_template('index.html')
 
 
-# @app.route('/urls', methods=['POST'])
-# def add_url():
-#    url = request.form.get('url')
-#    # Валидация URL
-#    if not validate_url(url):
-#        return redirect(url_for('home'))
-#    # Нормализация URL
-#    url = normalize_url(url)
-#    # Проверка на уникальность URL перед добавлением
-#    try:
-#        conn = psycopg2.connect(DATABASE_URL)
-#        with conn.cursor() as cursor:
-#            # Проверка на существование URL
-#            cursor.execute('SELECT id FROM urls WHERE name = %s', (url,))
-#            existing_url = cursor.fetchone()
-#            if existing_url:
-#                flash('Страница уже существует', 'success')
-#                return redirect(url_for('show_url', id=existing_url[0]))
-#            else:
-#                # Добавление URL в базу данных
-#                created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-#                cursor.execute(
-#                    "INSERT INTO urls (name, created_at) VALUES (%s, %s) \
-#                    RETURNING id", (url, created_at))
-#                new_url_id = cursor.fetchone()[0]  # Получаем ID нового URL
-#                conn.commit()
-#                flash('Страница успешно добавлена!', 'success')
-#    except Exception as e:
-#        flash(f'Ошибка при добавлении URL: {e}', 'error')
-#    finally:
-#        if 'conn' in locals():
-#            conn.close()
-#    # Перенаправление на страницу с деталями добавленного URL
-#    return redirect(url_for('show_url', id=new_url_id))
-# =================================
 @app.route('/urls', methods=['POST'])
 def add_url():
     url = request.form.get('url')
@@ -94,11 +61,8 @@ def add_url():
     finally:
         if 'conn' in locals():
             conn.close()
-
     # Перенаправление на страницу с деталями добавленного URL
     return redirect(url_for('show_url', id=new_url_id))
-
-# =============================
 
 
 @app.route('/urls')
