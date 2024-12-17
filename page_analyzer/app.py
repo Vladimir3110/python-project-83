@@ -92,14 +92,28 @@ def urls():
     return render_template('urls.html', urls=urls)
 
 
+# @app.route('/urls/<int:id>', methods=['GET'])
+# def show_url(id):
+#    """Маршрут для отображения списка URL и его проверок."""
+#    url, checks = get_url_and_checks(id)
+#    if not url:
+#        flash('URL не найден', 'error')
+#        return redirect(url_for('urls'))
+#    return render_template('url.html', url=url, checks=checks)
+
+
 @app.route('/urls/<int:id>', methods=['GET'])
-def show_url(id):
-    """Маршрут для отображения списка URL и его проверок."""
-    url, checks = get_url_and_checks(id)
-    if not url:
-        flash('URL не найден', 'error')
+def show_url(id: int):
+    """Маршрут для отображения URL и его проверок."""
+    try:
+        url, checks = get_url_and_checks(id)
+        if not url:
+            flash('URL не найден', 'error')
+            return redirect(url_for('urls'))
+        return render_template('url.html', url=url, checks=checks)
+    except Exception as e:
+        flash(f'Произошла ошибка: {e}', 'error')
         return redirect(url_for('urls'))
-    return render_template('url.html', url=url, checks=checks)
 
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
