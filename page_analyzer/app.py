@@ -30,33 +30,67 @@ def home():
     return render_template('index.html')
 
 
+# @app.route('/urls', methods=['POST'])
+# def add_url():
+#    url = request.form.get('url')
+#    # Валидация URL
+#    if not validate_url(url):
+#        return redirect(url_for('home'))
+#    # Нормализация URL
+#    url = normalize_url(url)
+#    # Проверка на уникальность URL перед добавлением
+#    try:
+#        conn = psycopg2.connect(DATABASE_URL)
+#        with conn.cursor() as cursor:
+#            # Проверка на существование URL
+#            cursor.execute('SELECT id FROM urls WHERE name = %s', (url,))
+#            existing_url = cursor.fetchone()
+#            if existing_url:
+#                flash('Страница уже существует', 'success')
+#                return redirect(url_for('show_url', id=existing_url[0]))
+#            else:
+#                # Добавление URL в базу данных
+#                created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+#                cursor.execute(
+#                    "INSERT INTO urls (name, created_at) VALUES (%s, %s) \
+#                    RETURNING id", (url, created_at))
+#                new_url_id = cursor.fetchone()[0]  # Получаем ID нового URL
+#                conn.commit()
+#                flash('Страница успешно добавлена!', 'success')
+#    except Exception as e:
+#        flash(f'Ошибка при добавлении URL: {e}', 'error')
+#    finally:
+#        if 'conn' in locals():
+#            conn.close()
+#    # Перенаправление на страницу с деталями добавленного URL
+#    return redirect(url_for('show_url', id=new_url_id))
+# =================================
 @app.route('/urls', methods=['POST'])
 def add_url():
     url = request.form.get('url')
-    # Валидация URL
-    if not validate_url(url):
-        return redirect(url_for('home'))
     # Нормализация URL
-    url = normalize_url(url)
-    # Проверка на уникальность URL перед добавлением
+    normalized_url = normalize_url(url)
+    # Проверка на существование URL
+    if normalized_url == "Страница уже существует":
+        # Получаем ID существующего URL
+        existing_url_id = get_existing_url_id(normalized_url)
+        flash('Страница уже существует', 'success')
+        return redirect(url_for('show_url', id=existing_url_id))
+    # Валидация URL
+    if not validate_url(normalized_url):
+        return redirect(url_for('home'))
+
+    # Добавление URL в базу данных
     try:
         conn = psycopg2.connect(DATABASE_URL)
         with conn.cursor() as cursor:
-            # Проверка на существование URL
-            cursor.execute('SELECT id FROM urls WHERE name = %s', (url,))
-            existing_url = cursor.fetchone()
-            if existing_url:
-                flash('Страница уже существует', 'success')
-                return redirect(url_for('show_url', id=existing_url[0]))
-            else:
-                # Добавление URL в базу данных
-                created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                cursor.execute(
-                    "INSERT INTO urls (name, created_at) VALUES (%s, %s) \
-                    RETURNING id", (url, created_at))
-                new_url_id = cursor.fetchone()[0]  # Получаем ID нового URL
-                conn.commit()
-                flash('Страница успешно добавлена!', 'success')
+            created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            cursor.execute(
+                "INSERT INTO urls (name, created_at) VALUES (%s, %s) \
+                RETURNING id", (normalized_url, created_at))
+            new_url_id = cursor.fetchone()[0]  # Получаем ID нового URL
+            conn.commit()
+            flash('Страница успешно добавлена!', 'success')
     except Exception as e:
         flash(f'Ошибка при добавлении URL: {e}', 'error')
     finally:
@@ -64,6 +98,21 @@ def add_url():
             conn.close()
     # Перенаправление на страницу с деталями добавленного URL
     return redirect(url_for('show_url', id=new_url_id))
+
+
+def get_existing_url_id(url):
+    """Получение ID существующего URL из базы данных."""
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        with conn.cursor() as cursor:
+            cursor.execute('SELECT id FROM urls WHERE name = %s', (url,))
+            existing_url = cursor.fetchone()
+            return existing_url[0] if existing_url else None
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
+# =============================
 
 
 @app.route('/urls')
