@@ -58,7 +58,7 @@ def add_url():
     if is_added:
         flash('Страница успешно добавлена!', 'success')
     else:
-        flash('Ошибка при добавлении URL', 'error')
+        flash('Произошла ошибка при добавлении страницы', 'error')
     return redirect(url_for('show_url', id=new_url_id))
 
 
