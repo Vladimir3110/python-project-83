@@ -2,7 +2,6 @@ from datetime import datetime
 
 import psycopg2
 from flask import flash, redirect, url_for
-
 from page_analyzer.parser import check_seo
 
 
@@ -18,9 +17,9 @@ def handle_check_url(conn, id):
             flash('URL не найден', 'error')
             return redirect(url_for('list_urls'))
         # Проверяем SEO-параметры и получаем данные
-        seo_data = check_seo(url[0])  # Передаем URL в функцию check_seo
+        seo_data = check_seo(url[0])
         # Проверяем, что данные SEO корректны
-        if seo_data is None:
+        if seo_data is None or seo_data.get('status_code') != 200:
             flash('Ошибка при получении данных SEO', 'error')
             return redirect(url_for('show_url', id=id))
         # Добавляем запись в таблицу url_checks
@@ -38,6 +37,8 @@ def handle_check_url(conn, id):
     except Exception as e:
         flash(f'Ошибка при добавлении проверки: {e}', 'error')
     finally:
-        if 'conn' in locals():
+        if cursor:
+            cursor.close()
+        if conn:
             conn.close()
     return redirect(url_for('show_url', id=id))
