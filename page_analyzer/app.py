@@ -124,7 +124,7 @@ def check_url(id):
         return handle_check_url(conn, id)
     except Exception as e:
         flash(f'Ошибка при подключении к базе данных: {e}', 'error')
-        return redirect(url_for('list_urls'))
+        return redirect(url_for('urls'))
     finally:
         if conn:
             conn.close()
