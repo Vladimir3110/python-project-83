@@ -1,69 +1,54 @@
 {% extends 'base.html' %}
 
-{% block main %}
-{% with messages = get_flashed_messages(with_categories=True) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="alert alert-{{ category }}" role="alert">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
-{% endblock %}
-
-
 {% block content %}
-        <div class="container-lg mt-3">
-
-        <h1>Сайт: {{ url[1] }}</h1>
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover text-nowrap" data-test="checks">
-                <tbody>
-                    <tr>
-                        <td>ID</td>
-                        <td>{{ url[0] }}</td>
-                    </tr>
-                    <tr>
-                        <td>Имя</td>
-                        <td>{{ url[1] }}</td>
-                    </tr>
-                    <tr>
-                        <td>Дата создания</td>
-                        <td>{{ url[2] }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <h2 class="mt-5 mb-3">Проверки</h2>
-        <form action="{{ url_for('check_url', id=url[0]) }}" method="post">
-            <input class="btn btn-primary" type="submit" value="Запустить проверку" />
-        </form>
-        <div>
-            <table class="table table-bordered table-hover mt-2" data-test="checks">
-                <thead>
-                    <tr class="table-secondary">
-                        <th>ID</th>
-                        <th>Код ответа</th>
-                        <th>h1</th>
-                        <th>title</th>
-                        <th>description</th>
-                        <th>Дата создания</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for check in checks %}
-                    <tr>
-                        <td>{{ check[0] }}</td>
-                        <td>{{ check[2] }}</td>
-                        <td>{{ check[3] }}</td>
-                        <td>{{ check[4] }}</td>
-                        <td>{{ check[5] }}</td>
-                        <td>{{ check[6] }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+<div class="container">
+    <h1 class="mt-5">Сайт: {{ url.name }}</h1>
+    <table class="table table-bordered table-hover text-nowrap" data-test="url">
+        <tbody>
+            <tr>
+                <td>ID</td>
+                <td>{{ url[0] }}</td>
+            </tr>
+            <tr>
+                <td>Имя</td>
+                <td>{{ url[1] }}</td>
+            </tr>
+            <tr>
+                <td>Дата создания</td>
+                <td>{{ url[2] }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<h2 class="mt-5 mb-3">Проверки</h2>
+<form action="{{ url_for('check_url', id=url[0]) }}" method="post">
+    <input class="btn btn-primary" type="submit" value="Запустить проверку" />
+</form>
+<div>
+    <table class="table table-bordered table-hover mt-2" data-test="checks">
+        <thead>
+            <tr class="table-secondary">
+                <th>ID</th>
+                <th>Код ответа</th>
+                <th>h1</th>
+                <th>title</th>
+                <th>description</th>
+                <th>Дата создания</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for check in checks %}
+            <tr>
+                <td>{{ check[0] }}</td>
+                <td>{{ check[2] }}</td>
+                <td>{{ check[3] }}</td>
+                <td>{{ check[4] }}</td>
+                <td>{{ check[5] }}</td>
+                <td>{{ check[6] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
 {% endblock %}

@@ -20,16 +20,20 @@
 </nav>
 
   </header>
+  <!-- Отображение flash-сообщений -->
+  {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
   
-  
-
   <main class="flex-grow-1">
-    {% block main %}{% endblock %}
-    <div class="container-lg mt-3">
-      <h1>{% block title %}{% endblock %}</h1>
-      {% block content %}{% endblock %}
-
-    </div>
+    {% block content %}
+    {% endblock %}
   </main>
   
   <footer class="border-top py-3 mt-5 flex-shrink-0">
