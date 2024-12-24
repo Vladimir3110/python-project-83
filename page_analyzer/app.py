@@ -2,6 +2,7 @@ from datetime import datetime
 
 import psycopg2
 from flask import Flask, flash, redirect, render_template, request, url_for
+
 from page_analyzer.config import DATABASE_URL, SECRET_KEY
 from page_analyzer.db_operators.url_service import get_url_and_checks
 from page_analyzer.url_check import handle_check_url
@@ -89,16 +90,6 @@ def urls():
         if 'conn' in locals():
             conn.close()
     return render_template('urls.html', urls=urls)
-
-
-# @app.route('/urls/<int:id>', methods=['GET'])
-# def show_url(id):
-#    """Маршрут для отображения списка URL и его проверок."""
-#    url, checks = get_url_and_checks(id)
-#    if not url:
-#        flash('URL не найден', 'error')
-#        return redirect(url_for('urls'))
-#    return render_template('url.html', url=url, checks=checks)
 
 
 @app.route('/urls/<int:id>', methods=['GET'])

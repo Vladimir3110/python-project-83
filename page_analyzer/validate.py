@@ -1,9 +1,7 @@
 import re
-from urllib.parse import urlparse  # urlunparse
+from urllib.parse import urlparse
 
 import psycopg2
-
-# import validators
 from flask import flash, get_flashed_messages
 
 from page_analyzer.config import DATABASE_URL
@@ -106,7 +104,6 @@ def add_url_to_db(database_url, normalized_url, created_at):
             existing_url = cursor.fetchone()
             if existing_url:
                 return False, existing_url[0]
-
             # Добавление нового URL в базу данных
             cursor.execute(
                 "INSERT INTO urls (name, created_at) VALUES (%s, %s) \
@@ -123,35 +120,3 @@ def add_url_to_db(database_url, normalized_url, created_at):
     finally:
         if 'conn' in locals():
             conn.close()
-
-
-# def normalize_url(url):
-#    """Нормализация URL, добавление схемы, если она отсутствует."""
-#    parsed_url = urlparse(url)
-#    if not parsed_url.scheme:
-#        url = 'http://' + url
-#        parsed_url = urlparse(url)  # Повторный разбор после добавления схемы
-
-#    # Нормализация компонентов URL
-#    scheme = parsed_url.scheme.lower()
-#    netloc = parsed_url.netloc.lower()
-#    path = parsed_url.path.lower().rstrip('/')
-#    query = parsed_url.query
-#    fragment = parsed_url.fragment
-
-#    # Удаление стандартных портов
-#    if scheme == 'http' and netloc.endswith(':80'):
-#        netloc = netloc[:-3]  # Удаление ':80'
-#    elif scheme == 'https' and netloc.endswith(':443'):
-#        netloc = netloc[:-4]  # Удаление ':443'
-#    # Восстановление нормализованного URL
-#    normalized_url = urlunparse((scheme, netloc, path, '', query, fragment))
-#    if normalized_url.endswith('/') and normalized_url != 'http://':
-#        normalized_url = normalized_url[:-1]
-#    # Проверка на существование URL в базе данных
-#    existing_url_id = get_existing_url_id(normalized_url)
-#    if existing_url_id:
-#        return existing_url_id  # Возвращаем ID существующего URL
-#    # Добавление нормализованного URL в набор
-#    existing_urls.add(normalized_url)
-#    return normalized_url
