@@ -27,8 +27,7 @@ def handle_check_url(conn, id):
             flash('Ошибка при получении данных SEO', 'error')
             return redirect(url_for('show_url', id=id))
         cursor.execute(
-            'INSERT INTO url_checks (url_id, status_code, h1, title, \
-            description, \
+            'INSERT INTO url_checks (url_id, status_code, title, description, \
             created_at) VALUES (%s, %s, %s, %s, %s)',
             (id, seo_data.get('status_code'), seo_data.get('title'),
              seo_data.get('description'), formatted_check_date)
