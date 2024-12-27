@@ -3,7 +3,6 @@ from urllib.parse import urlparse
 
 import psycopg2
 from flask import flash, get_flashed_messages
-
 from page_analyzer.config import DATABASE_URL
 
 MAX_LENGTH = 255
@@ -17,17 +16,6 @@ class MaxLengthError(Exception):
 class ValidationError(Exception):
     """Возникает, если URL-адрес недействителен."""
     pass
-
-# def validate_url(url):
-#    """Валидация URL."""
-#    if not validators.url(url) and len(url) <= 255:
-#        flash('Некорректный URL')
-#        return False
-#    return True
-
-
-# Хранение уже нормализованных URL для проверки дубликатов
-# existing_urls = set()
 
 
 def get_url_parts(url):
