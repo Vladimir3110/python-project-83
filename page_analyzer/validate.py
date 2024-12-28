@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 
 import psycopg2
 from flask import flash, get_flashed_messages
+
 from page_analyzer.config import DATABASE_URL
 
 MAX_LENGTH = 255
@@ -83,6 +84,7 @@ def add_url_to_db(database_url, normalized_url, created_at):
     """
     Добавляет нормализованный URL в базу данных.    """
     try:
+        created_at = created_at.strftime("%Y-%m-%d %H:%M:%S")
         # Подключение к базе данных
         conn = psycopg2.connect(database_url)
         with conn.cursor() as cursor:
