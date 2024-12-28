@@ -67,7 +67,8 @@ def handle_check_url(conn, id):
         description = seo_data.get('description', 'Нет описания')
 
         cursor.execute(
-            'INSERT INTO url_checks (url_id, status_code, title, description, \
+            'INSERT INTO url_checks (url_id, status_code, h1, title, \
+            description, \
             created_at) VALUES (%s, %s, %s, %s, %s)',
             (id, seo_data.get('status_code'), title, description,
              formatted_check_date)
