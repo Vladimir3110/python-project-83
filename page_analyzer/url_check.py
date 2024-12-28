@@ -58,19 +58,21 @@ def handle_check_url(conn, id):
         if not url:
             flash('URL не найден', 'error')
             return redirect(url_for('list_urls'))
+        # Получаем SEO данные
         seo_data = check_seo(url[0])
         if seo_data is None or seo_data.get('status_code') != 200:
             flash('Ошибка при получении данных SEO', 'error')
             return redirect(url_for('show_url', id=id))
-
+        # Извлекаем данные из seo_data
         title = seo_data.get('title', 'Нет заголовка')
         description = seo_data.get('description', 'Нет описания')
+        h1 = seo_data.get('h1', 'Нет h1')
 
+        # Вставляем данные в базу данных
         cursor.execute(
-            'INSERT INTO url_checks (url_id, status_code, h1, title, \
-            description, \
-            created_at) VALUES (%s, %s, %s, %s, %s)',
-            (id, seo_data.get('status_code'), title, description,
+            'INSERT INTO url_checks (url_id, status_code, title, description, \
+            h1, created_at) VALUES (%s, %s, %s, %s, %s, %s)',
+            (id, seo_data.get('status_code'), title, description, h1,
              formatted_check_date)
         )
         conn.commit()
