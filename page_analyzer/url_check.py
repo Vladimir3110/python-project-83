@@ -3,10 +3,9 @@ from datetime import datetime
 import psycopg2
 from flask import flash, redirect, url_for
 
-# from page_analyzer.db_operators.url_service import insert_url_check
+from page_analyzer.db_operators.url_service import insert_url_check
 from page_analyzer.parser import check_seo
-
-# from page_analyzer.validate import normalize_url, validate_url
+from page_analyzer.validate import normalize_url, validate_url
 
 
 def handle_check_url(conn, id):
@@ -21,21 +20,25 @@ def handle_check_url(conn, id):
             flash('URL не найден', 'error')
             return redirect(url_for('list_urls'))
 
-        seo_data = check_seo(url[0])
+        errors = validate_url(url[0])
+        if errors:
+            flash('Некорректный URL', 'error')
+            return redirect(url_for('show_url', id=id))
+
+        normalized_url = normalize_url(url[0])
+
+        # Получаем SEO данные
+        seo_data = check_seo(normalized_url)
         if seo_data is None or seo_data.get('status_code') != 200:
             flash('Произошла ошибка при проверке', 'error')
             return redirect(url_for('show_url', id=id))
+
         title = seo_data.get('title', 'Нет заголовка')
         description = seo_data.get('description', 'Нет описания')
         h1 = seo_data.get('h1', 'Нет h1')
 
-        cursor.execute(
-            'INSERT INTO url_checks (url_id, status_code, title, description, \
-            h1, created_at) VALUES (%s, %s, %s, %s, %s, %s)',
-            (id, seo_data.get('status_code'), title, description, h1,
-             formatted_check_date)
-        )
-        conn.commit()
+        insert_url_check(id, seo_data.get('status_code'), title,
+                         description, h1, formatted_check_date)
         flash('Страница успешно проверена!', 'success')
     except psycopg2.OperationalError as e:
         print(f'Невозможно установить соединение с базой данных: {e}')
