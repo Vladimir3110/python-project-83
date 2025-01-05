@@ -100,7 +100,6 @@ def check_url(id):
     finally:
         if conn:
             conn.close()
-        return redirect(url_for('urls'))
 
 
 if __name__ == '__main__':

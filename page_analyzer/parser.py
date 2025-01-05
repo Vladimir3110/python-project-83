@@ -11,7 +11,7 @@ headers = {
 
 def check_seo(url):
     try:
-        response = requests.get(url, headers=headers, timeout=18)
+        response = requests.get(url, headers=headers, timeout=15)
         response.raise_for_status()  # Проверка на ошибки HTTP
         # Выводим HTML-код страницы в консоль для отладки
         # print(response.text)
