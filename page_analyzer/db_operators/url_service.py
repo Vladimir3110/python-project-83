@@ -60,3 +60,21 @@ def get_urls_with_checks():
     finally:
         if 'conn' in locals():
             conn.close()
+
+
+def insert_url_check(url_id, status_code, title, description, h1, created_at):
+    """Вставляет данные о проверке URL в базу данных."""
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        with conn.cursor() as cursor:
+            cursor.execute(
+                'INSERT INTO url_checks (url_id, status_code, title, \
+                description, h1, created_at) VALUES (%s, %s, %s, %s, %s, %s)',
+                (url_id, status_code, title, description, h1, created_at)
+            )
+            conn.commit()
+    except Exception as e:
+        flash(f'Ошибка при добавлении проверки: {e}', 'error')
+    finally:
+        if 'conn' in locals():
+            conn.close()
