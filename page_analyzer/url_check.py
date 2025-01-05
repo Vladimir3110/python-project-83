@@ -5,6 +5,7 @@ from flask import flash, redirect, url_for
 
 from page_analyzer.db_operators.url_service import insert_url_check
 from page_analyzer.parser import check_seo
+from page_analyzer.validate import normalize_url, validate_url
 
 
 def handle_check_url(conn, id):
@@ -19,8 +20,15 @@ def handle_check_url(conn, id):
             flash('URL не найден', 'error')
             return redirect(url_for('list_urls'))
 
+        errors = validate_url(url[0])
+        if errors:
+            flash('Некорректный URL', 'error')
+            return redirect(url_for('show_url', id=id))
+
+        normalized_url = normalize_url(url[0])
+
         # Получаем SEO данные
-        seo_data = check_seo(url[0])
+        seo_data = check_seo(normalized_url)
         if seo_data is None or seo_data.get('status_code') != 200:
             flash('Произошла ошибка при проверке', 'error')
             return redirect(url_for('show_url', id=id))
