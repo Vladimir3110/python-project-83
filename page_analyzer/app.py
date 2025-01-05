@@ -4,7 +4,10 @@ import psycopg2
 from flask import Flask, flash, redirect, render_template, request, url_for
 
 from page_analyzer.config import DATABASE_URL, SECRET_KEY
-from page_analyzer.db_operators.url_service import get_url_and_checks
+from page_analyzer.db_operators.url_service import (
+    get_url_and_checks,
+    get_urls_with_checks,
+)
 from page_analyzer.url_check import handle_check_url
 from page_analyzer.validate import (
     add_url_to_db,
@@ -66,29 +69,7 @@ def add_url():
 @app.route('/urls')
 def urls():
     """Обработчик маршрута для отображения списка URL с их проверками."""
-    try:
-        conn = psycopg2.connect(DATABASE_URL)
-        with conn.cursor() as cursor:
-            # Извлечение URL и их последних проверок
-            cursor.execute("""
-                SELECT u.id, u.name, u.created_at, uc.status_code
-                FROM urls u
-                LEFT JOIN (
-                    SELECT url_id, status_code
-                    FROM url_checks
-                    WHERE id IN (
-                        SELECT MAX(id) FROM url_checks GROUP BY url_id
-                    )
-                ) uc ON u.id = uc.url_id
-                ORDER BY u.created_at DESC
-            """)
-            urls = cursor.fetchall()
-    except Exception as e:
-        flash(f'Ошибка при получении URL: {e}', 'error')
-        urls = []
-    finally:
-        if 'conn' in locals():
-            conn.close()
+    urls = get_urls_with_checks()
     return render_template('urls.html', urls=urls)
 
 
