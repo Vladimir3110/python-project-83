@@ -1,4 +1,3 @@
-from contextlib import closing
 from datetime import datetime
 
 import psycopg2
@@ -93,11 +92,14 @@ def check_url(id):
     """Обработчик маршрута для проверки URL."""
     conn = None
     try:
-        with psycopg2.connect(DATABASE_URL) as conn:
-            with closing(conn.cursor()) as cursor:
-                return handle_check_url(cursor, id)
+        conn = psycopg2.connect(DATABASE_URL)
+        return handle_check_url(conn, id)
     except Exception as e:
         flash(f'Ошибка при подключении к базе данных: {e}', 'error')
+        return redirect(url_for('urls'))
+    finally:
+        if conn:
+            conn.close()
         return redirect(url_for('urls'))
 
 
