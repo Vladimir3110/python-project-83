@@ -1,13 +1,9 @@
-# from contextlib import closing
 from datetime import datetime
 
-# import psycopg2
 from flask import flash, redirect, url_for
 
 from page_analyzer.db_operators.url_service import insert_url_check
 from page_analyzer.parser import check_seo
-
-# from page_analyzer.validate import normalize_url, validate_url
 
 
 def handle_check_url(conn, id, normalized_url):

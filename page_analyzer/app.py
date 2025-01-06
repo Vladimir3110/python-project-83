@@ -87,20 +87,6 @@ def show_url(id: int):
         return redirect(url_for('urls'))
 
 
-# @app.route('/urls/<int:id>/checks', methods=['POST'])
-# def check_url(id):
-#    """Обработчик маршрута для проверки URL."""
-#    conn = None
-#    try:
-#        conn = psycopg2.connect(DATABASE_URL)
-#        return handle_check_url(conn, id)
-#    except Exception as e:
-#        flash(f'Ошибка при подключении к базе данных: {e}', 'error')
-#        return redirect(url_for('urls'))
-#    finally:
-#        if conn:
-#            conn.close()
-
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def check_url(id):
     """Обработчик маршрута для проверки URL."""
