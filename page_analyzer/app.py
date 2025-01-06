@@ -87,19 +87,43 @@ def show_url(id: int):
         return redirect(url_for('urls'))
 
 
+# @app.route('/urls/<int:id>/checks', methods=['POST'])
+# def check_url(id):
+#    """Обработчик маршрута для проверки URL."""
+#    conn = None
+#    try:
+#        conn = psycopg2.connect(DATABASE_URL)
+#        return handle_check_url(conn, id)
+#    except Exception as e:
+#        flash(f'Ошибка при подключении к базе данных: {e}', 'error')
+#        return redirect(url_for('urls'))
+#    finally:
+#        if conn:
+#            conn.close()
+
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def check_url(id):
     """Обработчик маршрута для проверки URL."""
-    conn = None
     try:
-        conn = psycopg2.connect(DATABASE_URL)
-        return handle_check_url(conn, id)
+        with psycopg2.connect(DATABASE_URL) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('SELECT name FROM urls WHERE id = %s', (id,))
+                url = cursor.fetchone()
+                if not url:
+                    flash('URL не найден', 'error')
+                    return redirect(url_for('list_urls'))
+
+                errors = validate_url(url[0])
+                if errors:
+                    flash('Некорректный URL', 'error')
+                    return redirect(url_for('show_url', id=id))
+
+                normalized_url = normalize_url(url[0])
+
+                return handle_check_url(conn, id, normalized_url)
     except Exception as e:
         flash(f'Ошибка при подключении к базе данных: {e}', 'error')
         return redirect(url_for('urls'))
-    finally:
-        if conn:
-            conn.close()
 
 
 if __name__ == '__main__':
